@@ -1,0 +1,64 @@
+name: Build and Publish OpenWrt Thinkfan Package
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout the repository
+      - uses: actions/checkout@v2
+
+      # Install dependencies
+      - name: Install dependencies
+        run: |
+          sudo apt-get update && \
+          sudo apt-get install -y --no-install-recommends build-essential git python3 unzip wget libncurses5-dev zlib1g-dev gawk flex gettext curl ca-certificates cmake-curses-gui libyaml-cpp-dev pkg-config libsensors-dev
+
+      # Clone OpenWrt repository
+      - name: Clone OpenWrt repository
+        run: git clone https://git.openwrt.org/openwrt/openwrt.git openwrt
+
+      # Add Thinkfan package to OpenWrt
+      - name: Add Thinkfan package to OpenWrt
+        run: cd openwrt/package && git clone https://github.com/vmatare/thinkfan.git
+
+      # Configure OpenWrt
+      - name: Configure OpenWrt
+        run: cd openwrt && ./scripts/feeds update -a && ./scripts/feeds install -a
+
+      # Build OpenWrt with Thinkfan
+      - name: Build OpenWrt with Thinkfan
+        run: |
+          cd openwrt && \
+          make defconfig && \
+          make V=s
+
+      # Create a GitHub release
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
+        with:
+          tag_name: v1.0.0
+          release_name: OpenWrt Thinkfan Package v1.0.0
+          body: |
+            Description of the release goes here.
+          draft: false
+          prerelease: false
+
+      # Upload IPK file to the GitHub release
+      - name: Upload Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./openwrt/bin/targets/*/generic/packages/thinkfan_*.ipk
+          asset_name: thinkfan.ipk
+          asset_content_type: application/octet-stream

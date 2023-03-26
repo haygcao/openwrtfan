@@ -17,7 +17,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update && \
-          sudo apt-get install -y --no-install-recommends build-essential git python3 unzip wget libncurses5-dev zlib1g-dev gawk flex gettext curl ca-certificates cmake-curses-gui libyaml-cpp-dev pkgconfig libsensors-dev
+          sudo apt-get install -y --no-install-recommends build-essential git python3 unzip wget libncurses5-dev zlib1g-dev gawk flex gettext curl ca-certificates cmake-curses-gui libyaml-cpp-dev pkg-config libsensors-dev
 
       # Clone Thinkfan package
       - name: Clone Thinkfan package

@@ -28,7 +28,7 @@ jobs:
           cd $GITHUB_WORKSPACE
           wget https://downloads.openwrt.org/releases/22.03.2/targets/x86/generic/openwrt-toolchain-22.03.2-x86-generic_gcc-11.2.0_musl.Linux-x86_64.tar.xz
           tar -xvf openwrt-toolchain-22.03.2-x86-generic_gcc-11.2.0_musl.Linux-x86_64.tar.xz
-          mv openwrt-sdk-* openwrt-sdk
+          mv openwrt-toolchain-22.03.2-x86-generic_gcc-11.2.0_musl.Linux-x86_64 openwrt-sdk
           cd openwrt-sdk
           ./scripts/feeds update -a
           ./scripts/feeds install -a

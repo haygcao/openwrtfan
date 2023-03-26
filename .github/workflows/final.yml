@@ -1,4 +1,4 @@
-name: Build Fan Control IPKs for OpenWrt
+name: Build ThinkFan for OpenWrt x86
 
 on:
   push:
@@ -26,36 +26,31 @@ jobs:
       - name: Download OpenWrt SDK
         run: |
           cd $GITHUB_WORKSPACE
-          git clone --depth=1 https://github.com/openwrt/openwrt.git
-          cd openwrt
+          wget https://downloads.openwrt.org/releases/latest/targets/x86/64/openwrt-sdk-x86-64_gcc-8.4.0_musl.Linux-x86_64.tar.xz
+          tar -xvf openwrt-sdk-x86-64_gcc-8.4.0_musl.Linux-x86_64.tar.xz
+          mv openwrt-sdk-* openwrt-sdk
+          cd openwrt-sdk
           ./scripts/feeds update -a
           ./scripts/feeds install -a
-          make download V=s
-    
-      - name: Copy Fan Control Packages to SDK
+          
+      - name: Copy ThinkFan Package to SDK
         run: |
-          mkdir -p openwrt/package/custom
-          cp -r thinkfan mbpfan fancontrol2 openwrt/package/custom/
+          mkdir -p package/custom
+          git clone https://github.com/vurdalakov/openwrt-thinkfan.git package/custom/thinkfan
         
-      - name: Install Fan Control Package Dependencies
+      - name: Install ThinkFan Package Dependencies
         run: |
-          cd openwrt
-          ./scripts/feeds install -p custom mbpfan
+          cd openwrt-sdk
           ./scripts/feeds install -p custom thinkfan
-          ./scripts/feeds install -p custom fancontrol2
         
-      - name: Compile Fan Control Packages
+      - name: Compile ThinkFan Package
         run: |
-          cd openwrt
-          make package/mbpfan/compile V=s
+          cd openwrt-sdk
           make package/thinkfan/compile V=s
-          make package/fancontrol2/compile V=s
         
       - name: Upload IPK Artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: fan-control-ipks
+          name: thinkfan-ipk
           path: |
-            openwrt/bin/packages/x86_64/base/mbpfan*.ipk
-            openwrt/bin/packages/x86_64/base/thinkfan*.ipk
-            openwrt/bin/packages/x86_64/base/fancontrol2*.ipk
+            bin/packages/x86_64/base/thinkfan*.ipk

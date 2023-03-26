@@ -10,49 +10,52 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-    - name: Checkout Repository
-      uses: actions/checkout@v2
-      with:
-        ref: master
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+        with:
+          ref: master
       
-    - name: Install Build Dependencies
-      run: |
-        sudo apt-get update && \
-        sudo apt-get install -y build-essential libncurses5-dev zlib1g-dev gawk git gettext wget unzip python3
+      - name: Set Terminal Type
+        run: export TERM=xterm
         
-    - name: Download OpenWrt SDK
-      run: |
-        cd $GITHUB_WORKSPACE
-        git clone --depth=1 https://github.com/openwrt/openwrt.git
-        cd openwrt
-        ./scripts/feeds update -a
-        ./scripts/feeds install -a
-        make download V=s
+      - name: Install Build Dependencies
+        run: |
+          sudo apt-get update && \
+          sudo apt-get install -y build-essential libncurses5-dev zlib1g-dev gawk git gettext wget unzip python3
+        
+      - name: Download OpenWrt SDK
+        run: |
+          cd $GITHUB_WORKSPACE
+          git clone --depth=1 https://github.com/openwrt/openwrt.git
+          cd openwrt
+          ./scripts/feeds update -a
+          ./scripts/feeds install -a
+          make download V=s
     
-    - name: Copy Fan Control Packages to SDK
-      run: |
-        mkdir -p openwrt/package/custom
-        cp -r thinkfan mbpfan fancontrol2 openwrt/package/custom/
+      - name: Copy Fan Control Packages to SDK
+        run: |
+          mkdir -p openwrt/package/custom
+          cp -r thinkfan mbpfan fancontrol2 openwrt/package/custom/
         
-    - name: Install Fan Control Package Dependencies
-      run: |
-        cd openwrt
-        ./scripts/feeds install -p custom mbpfan
-        ./scripts/feeds install -p custom thinkfan
-        ./scripts/feeds install -p custom fancontrol2
+      - name: Install Fan Control Package Dependencies
+        run: |
+          cd openwrt
+          ./scripts/feeds install -p custom mbpfan
+          ./scripts/feeds install -p custom thinkfan
+          ./scripts/feeds install -p custom fancontrol2
         
-    - name: Compile Fan Control Packages
-      run: |
-        cd openwrt
-        make package/mbpfan/compile V=s
-        make package/thinkfan/compile V=s
-        make package/fancontrol2/compile V=s
+      - name: Compile Fan Control Packages
+        run: |
+          cd openwrt
+          make package/mbpfan/compile V=s
+          make package/thinkfan/compile V=s
+          make package/fancontrol2/compile V=s
         
-    - name: Upload IPK Artifacts
-      uses: actions/upload-artifact@v2
-      with:
-        name: fan-control-ipks
-        path: |
-          openwrt/bin/packages/x86_64/base/mbpfan*.ipk
-          openwrt/bin/packages/x86_64/base/thinkfan*.ipk
-          openwrt/bin/packages/x86_64/base/fancontrol2*.ipk
+      - name: Upload IPK Artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: fan-control-ipks
+          path: |
+            openwrt/bin/packages/x86_64/base/mbpfan*.ipk
+            openwrt/bin/packages/x86_64/base/thinkfan*.ipk
+            openwrt/bin/packages/x86_64/base/fancontrol2*.ipk

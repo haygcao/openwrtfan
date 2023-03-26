@@ -26,8 +26,8 @@ jobs:
       - name: Download OpenWrt SDK
         run: |
           cd $GITHUB_WORKSPACE
-          wget https://downloads.openwrt.org/releases/latest/targets/x86/64/openwrt-sdk-x86-64_gcc-8.4.0_musl.Linux-x86_64.tar.xz
-          tar -xvf openwrt-sdk-x86-64_gcc-8.4.0_musl.Linux-x86_64.tar.xz
+          wget https://downloads.openwrt.org/releases/22.03.2/targets/x86/generic/openwrt-toolchain-22.03.2-x86-generic_gcc-11.2.0_musl.Linux-x86_64.tar.xz
+          tar -xvf openwrt-toolchain-22.03.2-x86-generic_gcc-11.2.0_musl.Linux-x86_64.tar.xz
           mv openwrt-sdk-* openwrt-sdk
           cd openwrt-sdk
           ./scripts/feeds update -a
@@ -36,7 +36,7 @@ jobs:
       - name: Copy ThinkFan Package to SDK
         run: |
           mkdir -p package/custom
-          git clone https://github.com/vurdalakov/openwrt-thinkfan.git package/custom/thinkfan
+          git clone https://github.com/vmatare/thinkfan.git package/custom/thinkfan
         
       - name: Install ThinkFan Package Dependencies
         run: |
@@ -53,4 +53,4 @@ jobs:
         with:
           name: thinkfan-ipk
           path: |
-            bin/packages/x86_64/base/thinkfan*.ipk
+            bin/packages/x86/generic/thinkfan*.ipk

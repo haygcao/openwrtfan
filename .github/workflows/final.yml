@@ -12,6 +12,8 @@ jobs:
     steps:
     - name: Checkout Repository
       uses: actions/checkout@v2
+      with:
+        ref: master
       
     - name: Install Build Dependencies
       run: |
@@ -20,7 +22,8 @@ jobs:
         
     - name: Download OpenWrt SDK
       run: |
-        git clone --depth=1 git://github.com/openwrt/openwrt.git
+        cd $GITHUB_WORKSPACE
+        git clone --depth=1 https://github.com/openwrt/openwrt.git
         cd openwrt
         ./scripts/feeds update -a
         ./scripts/feeds install -a

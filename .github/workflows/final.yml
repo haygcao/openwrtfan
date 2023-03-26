@@ -26,7 +26,10 @@ jobs:
           mkdir openwrt-sdk
           cd openwrt-sdk
           wget https://downloads.openwrt.org/releases/22.03.2/targets/x86/generic/openwrt-sdk-22.03.2-x86-generic_gcc-11.2.0_musl.Linux-x86_64.tar.xz
-          tar -xf openwrt-sdk-22.03.2-x86-generic_gcc-11.2.0_musl.Linux-x86_64.tar.xz
+          xz -d openwrt-sdk-22.03.2-x86-generic_gcc-11.2.0_musl.Linux-x86_64.tar.xz
+          tar -xf openwrt-sdk-22.03.2-x86-generic_gcc-11.2.0_musl.Linux-x86_64.tar
+          mv openwrt-sdk-22.03.2-x86-generic_gcc-11.2.0_musl.Linux-x86_64/* .
+          rm -rf openwrt-sdk-22.03.2-x86-generic_gcc-11.2.0_musl.Linux-x86_64
           ./scripts/feeds update -a || true
           ./scripts/feeds install -a || true
           

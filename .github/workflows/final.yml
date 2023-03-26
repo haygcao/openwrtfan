@@ -1,57 +1,54 @@
-name: Build ThinkFan for OpenWrt x86
+name: Build and Publish OpenWrt Thinkfan Package
 
 on:
   push:
-    branches: [master]
+    branches:
+      - master
 
 jobs:
-  build:
+  build-and-publish:
     runs-on: ubuntu-latest
-    
+
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v2
-      
-      - name: Set Terminal Type
-        run: export TERM=xterm
-        
-      - name: Install Build Dependencies
+      # Checkout the repository
+      - uses: actions/checkout@v2
+
+      # Install dependencies
+      - name: Install dependencies
         run: |
           sudo apt-get update && \
-          sudo apt-get install -y build-essential libncurses5-dev zlib1g-dev gawk git gettext wget unzip python3
-        
-      - name: Download OpenWrt SDK
+          sudo apt-get install -y --no-install-recommends build-essential git python3 unzip wget libncurses5-dev zlib1g-dev gawk flex gettext curl ca-certificates cmake-curses-gui libyaml-cpp-dev pkgconfig libsensors-dev
+
+      # Clone Thinkfan package
+      - name: Clone Thinkfan package
+        run: git clone https://github.com/vmatare/thinkfan.git
+
+      # Build Thinkfan package and create IPK file
+      - name: Build Thinkfan package
         run: |
-          cd $GITHUB_WORKSPACE
-          mkdir openwrt-sdk
-          cd openwrt-sdk
-          wget https://downloads.openwrt.org/releases/22.03.2/targets/x86/generic/openwrt-sdk-22.03.2-x86-generic_gcc-11.2.0_musl.Linux-x86_64.tar.xz
-          xz -d openwrt-sdk-22.03.2-x86-generic_gcc-11.2.0_musl.Linux-x86_64.tar.xz
-          tar -xf openwrt-sdk-22.03.2-x86-generic_gcc-11.2.0_musl.Linux-x86_64.tar
-          mv openwrt-sdk-22.03.2-x86-generic_gcc-11.2.0_musl.Linux-x86_64/* .
-          rm -rf openwrt-sdk-22.03.2-x86-generic_gcc-11.2.0_musl.Linux-x86_64
-          ./scripts/feeds update -a || true
-          ./scripts/feeds install -a || true
-          
-      - name: Copy ThinkFan Package to SDK
-        run: |
-          cd $GITHUB_WORKSPACE
-          mkdir -p openwrt-sdk/package/custom
-          git clone https://github.com/vmatare/thinkfan.git openwrt-sdk/package/custom/thinkfan
-        
-      - name: Install ThinkFan Package Dependencies
-        run: |
-          cd $GITHUB_WORKSPACE/openwrt-sdk
-          ./scripts/feeds install -p custom thinkfan
-        
-      - name: Compile ThinkFan Package
-        run: |
-          cd $GITHUB_WORKSPACE/openwrt-sdk
-          make package/thinkfan/compile V=s
-        
-      - name: Upload IPK Artifacts
-        uses: actions/upload-artifact@v2
+          cd thinkfan && make package/compile V=s
+
+      # Create a GitHub release
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
         with:
-          name: thinkfan-ipk
-          path: |
-            bin/packages/x86/generic/thinkfan*.ipk
+          tag_name: v1.0.0
+          release_name: OpenWrt Thinkfan Package v1.0.0
+          body: |
+            Description of the release goes here.
+          draft: false
+          prerelease: false
+
+      # Upload IPK file to the GitHub release
+      - name: Upload Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./thinkfan_*.ipk
+          asset_name: thinkfan.ipk
+          asset_content_type: application/octet-stream

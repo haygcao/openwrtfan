@@ -392,8 +392,23 @@ define Device/aruba_ap-105
   DEVICE_MODEL := AP-105
   IMAGE_SIZE := 16000k
   DEVICE_PACKAGES := kmod-i2c-gpio kmod-tpm-i2c-atmel
+  LOADER_TYPE := bin
+  LOADER_FLASH_OFFS := 0x42000
+  COMPILE := loader-$(1).bin
+  COMPILE/loader-$(1).bin := loader-okli-compile
+  KERNEL := kernel-bin | append-dtb | lzma | uImage lzma -M 0x4f4b4c49 | loader-okli $(1) 8128 | uImage none
+  KERNEL_INITRAMFS := kernel-bin | append-dtb | lzma | loader-kernel | uImage none
 endef
 TARGET_DEVICES += aruba_ap-105
+
+define Device/aruba_ap-175
+  SOC := ar7161
+  DEVICE_VENDOR := Aruba
+  DEVICE_MODEL := AP-175
+  IMAGE_SIZE := 16000k
+  DEVICE_PACKAGES := kmod-gpio-pca953x kmod-hwmon-lm75 kmod-i2c-gpio kmod-rtc-ds1374
+endef
+TARGET_DEVICES += aruba_ap-175
 
 define Device/asus_pl-ac56
   SOC := qca9563
